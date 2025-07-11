@@ -1,0 +1,21 @@
+{
+  "welcome": "Welcome to Robust School",
+  "errors": {
+    "invalid_data": "Invalid data",
+    "email_exists": "This email is already in use",
+    "server_error": "Internal server error",
+    "invalid_credentials": "Invalid credentials",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden"
+  },
+  "messages": {
+    "registration_success": "Registration successful",
+    "login_success": "Login successful"
+  },
+  "dashboard": {
+    "admin_message": "Welcome to the admin dashboard",
+    "prof_message": "Welcome to your teacher space",
+    "eleve_message": "Welcome to your student space",
+    "default_message": "Welcome to your space"
+  }
+}

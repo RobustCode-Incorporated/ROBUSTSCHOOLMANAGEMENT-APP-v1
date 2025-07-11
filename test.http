@@ -1,0 +1,215 @@
+### ------------------------------
+### INSCRIPTIONS (création comptes)
+### ------------------------------
+
+### Inscription administrateur
+POST http://localhost:5050/api/auth/register?lng=fr
+Content-Type: application/json
+
+{
+  "firstName": "Admin",
+  "lastName": "Principal",
+  "email": "admin@example.com",
+  "password": "admin1234",
+  "role": "admin"
+}
+
+### Inscription professeur
+POST http://localhost:5050/api/auth/register?lng=fr
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "prof@example.com",
+  "password": "prof1234",
+  "role": "prof"
+}
+
+### Inscription élève
+POST http://localhost:5050/api/auth/register?lng=fr
+Content-Type: application/json
+
+{
+  "firstName": "Jean",
+  "lastName": "Luc",
+  "email": "eleve@example.com",
+  "password": "eleve1234",
+  "role": "eleve"
+}
+
+### ------------------------------
+### CONNEXIONS (obtenir tokens JWT)
+### ------------------------------
+
+### Connexion admin
+POST http://localhost:5050/api/auth/login?lng=fr
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin1234"
+}
+
+### Connexion prof
+POST http://localhost:5050/api/auth/login?lng=fr
+Content-Type: application/json
+
+{
+  "email": "prof@example.com",
+  "password": "prof1234"
+}
+
+### Connexion élève
+POST http://localhost:5050/api/auth/login?lng=fr
+Content-Type: application/json
+
+{
+  "email": "eleve@example.com",
+  "password": "eleve1234"
+}
+
+### ------------------------------
+### TESTS ADMIN (avec token admin à copier/coller)
+### ------------------------------
+
+### Créer une classe
+POST http://localhost:5050/api/classrooms
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3ZTk4YzI4LTVjNTMtNDRiYS04YTBhLWE3MTE2ZDhmNjA1OCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1MTQ3OTEyNCwiZXhwIjoxNzUxNTY1NTI0fQ.0XIt2FbTUFGsz6MAHSUl4ZLjT_wBp5YFDzYabrLGwRE
+Content-Type: application/json
+
+{
+  "name": "Terminale A",
+  "level": "Terminale",
+  "academicYear": "2024-2025"
+}
+
+### Créer une matière
+POST http://localhost:5050/api/subjects
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3ZTk4YzI4LTVjNTMtNDRiYS04YTBhLWE3MTE2ZDhmNjA1OCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1MTQ3OTEyNCwiZXhwIjoxNzUxNTY1NTI0fQ.0XIt2FbTUFGsz6MAHSUl4ZLjT_wBp5YFDzYabrLGwRE
+Content-Type: application/json
+
+{
+  "name": "Mathématiques",
+  "code": "MATH101",
+  "coefficient": 4
+}
+
+### Affecter un professeur à une matière et classe
+POST http://localhost:5050/api/teaching-assignments
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3ZTk4YzI4LTVjNTMtNDRiYS04YTBhLWE3MTE2ZDhmNjA1OCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1MTQ4NTU1OCwiZXhwIjoxNzUxNTcxOTU4fQ.ylRKpMTnvKDF5nZDe6K_68KJB_oc-M7aDHhYjb4fAHk
+Content-Type: application/json
+
+{
+  "professorId": "03a2077f-5d5d-4e30-8e90-9e5f3a999bcf",
+  "subjectId": "2c63706a-21cd-49a6-bf23-c53b30185cef",
+  "classroomId": "d01347f7-b533-49b9-8cce-8a98d4b3f545"
+}
+
+### Affecter un élève à une classe
+POST http://localhost:5050/api/student-assignments
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3ZTk4YzI4LTVjNTMtNDRiYS04YTBhLWE3MTE2ZDhmNjA1OCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1MTQ4NTU1OCwiZXhwIjoxNzUxNTcxOTU4fQ.ylRKpMTnvKDF5nZDe6K_68KJB_oc-M7aDHhYjb4fAHk
+Content-Type: application/json
+
+{
+  "studentId": "81d97811-0e4d-46c8-b496-8c30068fca63",
+  "classroomId": "d01347f7-b533-49b9-8cce-8a98d4b3f545"
+}
+
+### ------------------------------
+### TESTS PROF (avec token prof)
+### ------------------------------
+
+### Saisie note
+POST http://localhost:5050/api/notes
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAzYTIwNzdmLTVkNWQtNGUzMC04ZTkwLTllNWYzYTk5OWJjZiIsInJvbGUiOiJwcm9mIiwiaWF0IjoxNzUxNDg1NzMwLCJleHAiOjE3NTE1NzIxMzB9.LTXWNZ9xUdTLvt_zIndXuvjf6ysxkB-3UiobJ8Igif0
+Content-Type: application/json
+
+{
+  "studentId": "81d97811-0e4d-46c8-b496-8c30068fca63",
+  "subjectId": "2c63706a-21cd-49a6-bf23-c53b30185cef",
+  "classroomId": "d01347f7-b533-49b9-8cce-8a98d4b3f545",
+  "value": 15.5,
+  "comment": "Bon travail",
+  "date": "2025-07-02"
+}
+
+### Modifier note
+PUT http://localhost:5050/api/notes/e3edf8b3-adb6-471f-8893-8b0aa6c64187
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAzYTIwNzdmLTVkNWQtNGUzMC04ZTkwLTllNWYzYTk5OWJjZiIsInJvbGUiOiJwcm9mIiwiaWF0IjoxNzUxNDc5NzI5LCJleHAiOjE3NTE1NjYxMjl9.HsWjShnMjyLe_QEYG4xuK_POxkk8lhr7pxoi3s9VhLg
+Content-Type: application/json
+
+{
+  "value": 16.0,
+  "comment": "Note corrigée"
+}
+
+### Supprimer note
+DELETE http://localhost:5050/api/notes/<ID_NOTE>
+Authorization: Bearer <TOKEN_PROF>
+
+### ------------------------------
+### TESTS ÉLÈVE (avec token élève)
+### ------------------------------
+
+### Consulter ses notes
+GET http://localhost:5050/api/notes
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgxZDk3ODExLTBlNGQtNDZjOC1iNDk2LThjMzAwNjhmY2E2MyIsInJvbGUiOiJlbGV2ZSIsImlhdCI6MTc1MTQ3OTg1OSwiZXhwIjoxNzUxNTY2MjU5fQ.ah2qtIzU9PNABg1nfsFFhhzf09DK2iEaB5tQa-suaUA
+
+### ✅ Créer un créneau (admin)
+POST http://localhost:5050/api/timetable
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3ZTk4YzI4LTVjNTMtNDRiYS04YTBhLWE3MTE2ZDhmNjA1OCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1MTQ4MDU1OSwiZXhwIjoxNzUxNTY2OTU5fQ._Iq5GWP_6R4lhl0Mv6rEHNk_oiR6FePUWbkBAzgER_w
+Content-Type: application/json
+
+{
+  "professorId": "03a2077f-5d5d-4e30-8e90-9e5f3a999bcf",
+  "subjectId": "2c63706a-21cd-49a6-bf23-c53b30185cef",
+  "classroomId": "d01347f7-b533-49b9-8cce-8a98d4b3f545",
+  "dayOfWeek": "lundi",
+  "startTime": "08:00",
+  "endTime": "09:30",
+  "location": "Salle 101"
+}
+
+### ✅ Lister tous les créneaux (admin)
+GET http://localhost:5050/api/timetable
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3ZTk4YzI4LTVjNTMtNDRiYS04YTBhLWE3MTE2ZDhmNjA1OCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1MTQ4MDU1OSwiZXhwIjoxNzUxNTY2OTU5fQ._Iq5GWP_6R4lhl0Mv6rEHNk_oiR6FePUWbkBAzgER_w
+
+### ✅ Voir son emploi du temps (professeur connecté)
+GET http://localhost:5050/api/timetable/professeur
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAzYTIwNzdmLTVkNWQtNGUzMC04ZTkwLTllNWYzYTk5OWJjZiIsInJvbGUiOiJwcm9mIiwiaWF0IjoxNzUxNDgwNzI1LCJleHAiOjE3NTE1NjcxMjV9.jb69K7s3WsRXn12LRXCcN5dZjw8GmZ0yOK2o7zo3DKw
+
+### ✅ Voir son emploi du temps (élève)
+GET http://localhost:5050/api/timetable/eleve/d01347f7-b533-49b9-8cce-8a98d4b3f545
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgxZDk3ODExLTBlNGQtNDZjOC1iNDk2LThjMzAwNjhmY2E2MyIsInJvbGUiOiJlbGV2ZSIsImlhdCI6MTc1MTQ4MDc3OSwiZXhwIjoxNzUxNTY3MTc5fQ.4SWGXlu6P_f-MR-GxzmqhHFzMPXi6EYkXxwzIjVT11Q
+
+### Upload document (via REST Client extension)
+POST http://localhost:5050/api/documents
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAzYTIwNzdmLTVkNWQtNGUzMC04ZTkwLTllNWYzYTk5OWJjZiIsInJvbGUiOiJwcm9mIiwiaWF0IjoxNzUxNDgxODY0LCJleHAiOjE3NTE1NjgyNjR9.XUskl8Pko51yZLJyNZ9tU089f6gR1ySQjQcSigXV6Tg
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary7MA4YWxkTrZu0gW
+
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="cours.pdf"
+Content-Type: application/pdf
+
+< ./chemin/vers/le/fichier/cours.pdf
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="classroomId"
+
+d01347f7-b533-49b9-8cce-8a98d4b3f545
+--WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="subjectId"
+
+2c63706a-21cd-49a6-bf23-c53b30185cef
+--WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Télécharger bulletin (admin)
+GET http://localhost:5050/api/pdf/bulletin/81d97811-0e4d-46c8-b496-8c30068fca63
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3ZTk4YzI4LTVjNTMtNDRiYS04YTBhLWE3MTE2ZDhmNjA1OCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1MTQ4NjU5MiwiZXhwIjoxNzUxNTcyOTkyfQ.bPReSFc8wUYmn2SrRC8XnCEMjkmax84OfSyY4QPSrDc
+
+### Télécharger son propre bulletin (élève)
+GET http://localhost:5050/api/pdf/bulletin/81d97811-0e4d-46c8-b496-8c30068fca63
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgxZDk3ODExLTBlNGQtNDZjOC1iNDk2LThjMzAwNjhmY2E2MyIsInJvbGUiOiJlbGV2ZSIsImlhdCI6MTc1MTQ4MzQ5MywiZXhwIjoxNzUxNTY5ODkzfQ.amRYUjRRDhoL0V5E4P15IsmuHzGzPkf29FV5uwZfIeg
+
+
+GET http://localhost:5050/api/professor/{idProfesseur}/subjects-with-students

@@ -1,0 +1,21 @@
+{
+  "welcome": "Bienvenue sur Robust School",
+  "errors": {
+    "invalid_data": "Données invalides",
+    "email_exists": "Cet email est déjà utilisé",
+    "server_error": "Erreur interne du serveur",
+    "invalid_credentials": "Identifiants invalides",
+    "unauthorized": "Non autorisé",
+    "forbidden": "Accès refusé"
+  },
+  "messages": {
+    "registration_success": "Inscription réussie",
+    "login_success": "Connexion réussie"
+  },
+  "dashboard": {
+    "admin_message": "Bienvenue dans le tableau de bord administrateur",
+    "prof_message": "Bienvenue dans votre espace professeur",
+    "eleve_message": "Bienvenue dans votre espace étudiant",
+    "default_message": "Bienvenue dans votre espace"
+  }
+}
