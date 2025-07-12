@@ -26,4 +26,14 @@ Subject.belongsToMany(User, {
   as: 'students'
 });
 
+StudentSubject.belongsTo(User, {
+  foreignKey: 'studentId',
+  as: 'student'
+});
+
+StudentSubject.belongsTo(Subject, {
+  foreignKey: 'subjectId',
+  as: 'subject'
+});
+
 module.exports = StudentSubject;

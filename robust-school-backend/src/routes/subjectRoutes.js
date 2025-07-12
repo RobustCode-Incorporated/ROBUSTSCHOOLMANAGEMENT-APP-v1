@@ -121,4 +121,37 @@ router.delete('/:id', authMiddleware(['admin']), async (req, res) => {
   }
 });
 
+router.get('/professor/enrolled-students', authMiddleware(['prof']), async (req, res) => {
+  try {
+    // 1. Obtenir les subjectId enseignés par le prof
+    const assignments = await TeachingAssignment.findAll({
+      where: { professorId: req.user.id },
+      attributes: ['subjectId']
+    });
+    const subjectIds = assignments.map(a => a.subjectId);
+
+    // 2. Trouver les élèves inscrits à ces matières
+    const enrolled = await StudentSubject.findAll({
+      where: { subjectId: subjectIds },
+      include: [
+        {
+          model: User,
+          as: 'student',
+          attributes: ['id', 'firstName', 'lastName']
+        },
+        {
+          model: Subject,
+          as: 'subject',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
+
+    res.json(enrolled);
+  } catch (err) {
+    console.error('Erreur chargement élèves inscrits:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
 module.exports = router;

@@ -11,7 +11,7 @@
         <router-link to="/admin/timetable" class="menu-item">📅 Gérer l'emploi du temps</router-link>
         <router-link to="/admin/documents" class="menu-item">📁 Gérer les documents</router-link>
         <router-link to="/admin/notes" class="menu-item">📝 Gérer les notes</router-link>
-        <router-link to="/admin/teaching-assignments" class="menu-item">👨‍🏫 Gérer les affectations</router-link>
+        <!--<router-link to="/admin/teaching-assignments" class="menu-item">👨‍🏫 Gérer les affectations</router-link>-->
       </nav>
     </aside>
 
