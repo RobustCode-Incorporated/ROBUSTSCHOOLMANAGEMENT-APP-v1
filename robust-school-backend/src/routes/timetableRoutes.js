@@ -70,23 +70,7 @@ router.get('/professeur', authMiddleware(['prof']), async (req, res) => {
   }
 });
 
-// ✅ Emploi du temps d’un élève via classroomId
-router.get('/eleve/:classroomId', authMiddleware(['eleve']), async (req, res) => {
-  try {
-    const { classroomId } = req.params;
-    const timetable = await TimetableEntry.findAll({
-      where: { classroomId },
-      include: [
-        { model: Subject, as: 'timetableSubject' },
-        { model: User, as: 'timetableProfessor', attributes: ['firstName', 'lastName'] }
-      ]
-    });
-    res.json(timetable);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: req.t('errors.server_error') });
-  }
-});
+
 
 // ✅ Modifier un créneau horaire (admin uniquement)
 router.put('/:id', authMiddleware(['admin']), async (req, res) => {
@@ -136,11 +120,13 @@ router.get('/eleve', authMiddleware(['eleve']), async (req, res) => {
 
     const timetable = await TimetableEntry.findAll({
       where: { subjectId: subjectIds },
+      attributes: ['id', 'date', 'startTime', 'endTime', 'location'], // ✅ Inclure ici les champs de base
       include: [
         { model: Subject, as: 'timetableSubject', attributes: ['name', 'code'] },
         { model: User, as: 'timetableProfessor', attributes: ['firstName', 'lastName'] },
         { model: Classroom, as: 'timetableClassroom', attributes: ['name', 'level'] }
-      ]
+      ],
+      order: [['date', 'ASC'], ['startTime', 'ASC']]
     });
 
     res.json(timetable);

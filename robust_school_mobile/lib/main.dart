@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import '../screens/LoginScreen.dart';
 import '../screens/ProfDashboardScreen.dart';
@@ -12,7 +13,9 @@ import '../screens/EleveSubjectsScreen.dart';
 import '../screens/EleveTimetableScreen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('fr_FR', null); // 👈 Ajouté pour le support français
   runApp(const RobustSchoolApp());
 }
 

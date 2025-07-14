@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../services/api_service.dart';
 
 class EleveTimetableScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _EleveTimetableScreenState extends State<EleveTimetableScreen> {
   Future<void> fetchTimetable() async {
     try {
       final res = await ApiService.get('/timetable/eleve');
+      print('🧪 Données reçues : $res'); // Debug temporaire
       setState(() {
         timetable = res;
         isLoading = false;
@@ -34,8 +36,19 @@ class _EleveTimetableScreenState extends State<EleveTimetableScreen> {
     }
   }
 
-  String capitalize(String s) =>
-      s.isNotEmpty ? s[0].toUpperCase() + s.substring(1) : s;
+  String formatDateFr(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'Date inconnue';
+    try {
+      final date = DateTime.parse(dateStr);
+      final formatter = DateFormat('EEEE dd/MM/yyyy', 'fr_FR');
+      return formatter.format(date).replaceFirstMapped(
+        RegExp(r'^\w'),
+        (m) => m[0]!.toUpperCase(),
+      );
+    } catch (_) {
+      return 'Date invalide';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,15 +81,17 @@ class _EleveTimetableScreenState extends State<EleveTimetableScreen> {
                         itemCount: timetable.length,
                         itemBuilder: (context, index) {
                           final entry = timetable[index];
-                          final day = capitalize(entry['dayOfWeek'] ?? 'Inconnu');
-                          final subject = entry['timetableSubject']?['name'] ?? 'Matière inconnue';
-                          final start = entry['startTime'] ?? '-';
-                          final end = entry['endTime'] ?? '-';
-                          final location = entry['location'] ?? '-';
+                          final subject = entry['timetableSubject']?['name'];
+                          final start = entry['startTime'];
+                          final end = entry['endTime'];
+                          final location = entry['location'];
                           final prof = entry['timetableProfessor'];
                           final profName = prof != null
                               ? '${prof['firstName']} ${prof['lastName']}'
                               : 'Professeur inconnu';
+
+                          final rawDate = entry.containsKey('date') ? entry['date'] : null;
+                          final formattedDate = formatDateFr(rawDate);
 
                           return Card(
                             shape: RoundedRectangleBorder(
@@ -90,37 +105,53 @@ class _EleveTimetableScreenState extends State<EleveTimetableScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '$day : $subject',
+                                    formattedDate,
                                     style: const TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                       color: Color(0xFF0E2C5A),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.schedule, size: 20, color: Colors.grey),
-                                      const SizedBox(width: 6),
-                                      Text('De $start à $end'),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.person, size: 20, color: Colors.grey),
-                                      const SizedBox(width: 6),
-                                      Text(profName),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on, size: 20, color: Colors.grey),
-                                      const SizedBox(width: 6),
-                                      Text(location),
-                                    ],
-                                  ),
+                                  if (subject != null) ...[
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      subject,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                  if (start != null && end != null) ...[
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.schedule, size: 20, color: Colors.grey),
+                                        const SizedBox(width: 6),
+                                        Text('De $start à $end'),
+                                      ],
+                                    ),
+                                  ],
+                                  if (profName.isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.person, size: 20, color: Colors.grey),
+                                        const SizedBox(width: 6),
+                                        Text(profName),
+                                      ],
+                                    ),
+                                  ],
+                                  if (location != null && location.toString().trim().isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.location_on, size: 20, color: Colors.grey),
+                                        const SizedBox(width: 6),
+                                        Text(location),
+                                      ],
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),

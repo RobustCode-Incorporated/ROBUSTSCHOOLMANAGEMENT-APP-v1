@@ -1,67 +1,75 @@
 <template>
   <div class="prof-notes">
-    <h2>🎓 Gestion des notes</h2>
+    <!-- Header commun -->
+    <div class="header">
+      <img src="/src/assets/logo_white.png" alt="Logo" class="logo" />
+      <h1>ROBUST SCHOOL MANAGEMENT SYSTEM</h1>
+    </div>
 
-    <form @submit.prevent="handleSubmit" class="note-form">
-      <label>Matière enseignée :</label>
-      <select v-model="form.subjectId" required>
-        <option disabled value="">Sélectionner une matière</option>
-        <option v-for="s in subjects" :key="s.id" :value="s.id">{{ s.name }}</option>
-      </select>
+    <div class="content">
+      <h2>🎓 Gestion des notes</h2>
 
-      <label>Élève inscrit :</label>
-      <select v-model="form.studentId" required>
-        <option disabled value="">Sélectionner un élève</option>
-        <option v-for="s in filteredStudents" :key="s.student.id" :value="s.student.id">
-          {{ getStudentName(s.student.id) }} ({{ getSubjectName(s.subject.id) }})
-        </option>
-      </select>
+      <form @submit.prevent="handleSubmit" class="note-form">
+        <label>Matière enseignée :</label>
+        <select v-model="form.subjectId" required>
+          <option disabled value="">Sélectionner une matière</option>
+          <option v-for="s in subjects" :key="s.id" :value="s.id">{{ s.name }}</option>
+        </select>
 
-      <label>Note (0-20)</label>
-      <input v-model.number="form.value" type="number" min="0" max="20" step="0.1" placeholder="Note" required />
+        <label>Élève inscrit :</label>
+        <select v-model="form.studentId" required>
+          <option disabled value="">Sélectionner un élève</option>
+          <option v-for="s in filteredStudents" :key="s.student.id" :value="s.student.id">
+            {{ getStudentName(s.student.id) }} ({{ getSubjectName(s.subject.id) }})
+          </option>
+        </select>
 
-      <label>Commentaire</label>
-      <input v-model="form.comment" type="text" placeholder="Commentaire (optionnel)" />
+        <label>Note (0-20)</label>
+        <input v-model.number="form.value" type="number" min="0" max="20" step="0.1" placeholder="Note" required />
 
-      <label>Date</label>
-      <input v-model="form.date" type="date" required />
+        <label>Commentaire</label>
+        <input v-model="form.comment" type="text" placeholder="Commentaire (optionnel)" />
 
-      <div class="form-buttons">
-        <button type="submit">{{ editMode ? 'Mettre à jour' : 'Ajouter la note' }}</button>
-        <button v-if="editMode" @click="cancelEdit" type="button">Annuler</button>
-      </div>
+        <label>Date</label>
+        <input v-model="form.date" type="date" required />
 
-      <p v-if="formError" class="error">{{ formError }}</p>
-      <p v-if="successMessage" class="success">{{ successMessage }}</p>
-    </form>
+        <div class="form-buttons">
+          <button type="submit">{{ editMode ? 'Mettre à jour' : 'Ajouter la note' }}</button>
+          <button v-if="editMode" @click="cancelEdit" type="button">Annuler</button>
+        </div>
 
-    <hr />
-    <h3>🗂️ Liste des notes enregistrées</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Élève</th>
-          <th>Matière</th>
-          <th>Note</th>
-          <th>Commentaire</th>
-          <th>Date</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="note in notes" :key="note.id">
-          <td>{{ getStudentName(note.studentId) }}</td>
-          <td>{{ getSubjectName(note.subjectId) }}</td>
-          <td>{{ note.value }}</td>
-          <td>{{ note.comment || '-' }}</td>
-          <td>{{ formatDate(note.date) }}</td>
-          <td>
-            <button @click="startEdit(note)">✏️</button>
-            <button @click="confirmDelete(note)">🗑️</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        <p v-if="formError" class="error">{{ formError }}</p>
+        <p v-if="successMessage" class="success">{{ successMessage }}</p>
+      </form>
+
+      <hr />
+      <h3>🗂️ Liste des notes enregistrées</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Élève</th>
+            <th>Matière</th>
+            <th>Note</th>
+            <th>Commentaire</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="note in notes" :key="note.id">
+            <td>{{ getStudentName(note.studentId) }}</td>
+            <td>{{ getSubjectName(note.subjectId) }}</td>
+            <td>{{ note.value }}</td>
+            <td>{{ note.comment || '-' }}</td>
+            <td>{{ formatDate(note.date) }}</td>
+            <td>
+              <button @click="startEdit(note)">✏️</button>
+              <button @click="confirmDelete(note)">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -179,17 +187,50 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Ysabeau+Office&family=ABeeZee&family=Inter&display=swap');
+
 .prof-notes {
-  max-width: 800px;
+  font-family: 'ABeeZee', sans-serif;
+}
+
+.header {
+  background-color: #0e2c5a;
+  color: white;
+  padding: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header .logo {
+  width: 50px;
+  height: auto;
+}
+
+.header h1 {
+  font-family: 'Ysabeau Office', sans-serif;
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.content {
+  max-width: 900px;
   margin: auto;
-  padding: 2rem;
+  padding: 2rem 1rem;
   font-family: 'Ysabeau Office', sans-serif;
 }
+
+h2, h3 {
+  color: #0E2C5A;
+  margin-bottom: 1rem;
+}
+
 .note-form {
   display: grid;
   gap: 0.7rem;
   margin-bottom: 2rem;
 }
+
 input,
 select {
   padding: 0.5rem;
@@ -197,10 +238,12 @@ select {
   width: 100%;
   font-family: 'ABeeZee', sans-serif;
 }
+
 .form-buttons {
   display: flex;
   gap: 1rem;
 }
+
 button {
   padding: 0.5rem 1rem;
   cursor: pointer;
@@ -210,23 +253,29 @@ button {
   border-radius: 4px;
   font-family: 'Inter', sans-serif;
 }
+
 button:hover {
   background-color: #104b71;
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
+  font-size: 0.95rem;
 }
+
 th,
 td {
   border: 1px solid #ccc;
   padding: 0.6rem;
   text-align: center;
 }
+
 .error {
   color: red;
 }
+
 .success {
   color: green;
   margin-top: 1rem;

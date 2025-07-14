@@ -35,7 +35,7 @@
           <table class="timetable-table">
             <thead>
               <tr>
-                <th>Jour</th>
+                <th>Date</th>
                 <th>Heure début</th>
                 <th>Heure fin</th>
                 <th>Matière</th>
@@ -45,12 +45,12 @@
             </thead>
             <tbody>
               <tr v-for="entry in timetable" :key="entry.id">
-                <td>{{ capitalize(entry.dayOfWeek) }}</td>
+                <td>{{ formatDate(entry.date) }}</td>
                 <td>{{ entry.startTime }}</td>
                 <td>{{ entry.endTime }}</td>
                 <td>{{ entry.timetableSubject?.name || 'N/A' }}</td>
                 <td>
-                  {{ entry.timetableTeacher ? entry.timetableTeacher.firstName + ' ' + entry.timetableTeacher.lastName : 'N/A' }}
+                  {{ entry.timetableProfessor ? entry.timetableProfessor.firstName + ' ' + entry.timetableProfessor.lastName : 'N/A' }}
                 </td>
                 <td>{{ entry.location || '-' }}</td>
               </tr>
@@ -91,14 +91,25 @@ const fetchTimetable = async () => {
   }
 }
 
+// Ajoute cette fonction pour gérer la déconnexion
 const handleLogout = () => {
-  store.dispatch('logout')
+  // Nettoyer l'état utilisateur dans le store
+  store.commit('logout')  // Assure-toi d'avoir un mutation logout qui vide user + token
+
+  // Supprimer le token stocké localement si tu en as un
+  localStorage.removeItem('token')
+
+  // Rediriger vers la page login
   router.push('/login')
 }
 
-const capitalize = (text) => {
-  if (!text) return ''
-  return text.charAt(0).toUpperCase() + text.slice(1)
+const formatDate = (dateStr) => {
+  if (!dateStr) return 'N/A'
+  const d = new Date(dateStr)
+  const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+  const jour = jours[d.getDay()]
+  const dateFr = d.toLocaleDateString('fr-FR')
+  return `${jour} ${dateFr}`
 }
 
 onMounted(() => {

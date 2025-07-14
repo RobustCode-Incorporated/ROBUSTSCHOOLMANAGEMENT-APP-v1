@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../services/api_service.dart';
 
 class ProfTimetableScreen extends StatefulWidget {
@@ -43,6 +44,16 @@ class _ProfTimetableScreenState extends State<ProfTimetableScreen> {
     return s.isNotEmpty ? '${s[0].toUpperCase()}${s.substring(1)}' : s;
   }
 
+  String formatDateFr(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      final formatter = DateFormat('EEEE dd/MM/yyyy', 'fr_FR');
+      return capitalize(formatter.format(date));
+    } catch (_) {
+      return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,13 +85,31 @@ class _ProfTimetableScreenState extends State<ProfTimetableScreen> {
                         itemCount: timetable.length,
                         itemBuilder: (context, index) {
                           final entry = timetable[index];
+
+                          // Date formatée (si disponible)
+                          final dateStr = entry['date'];
+                          final formattedDate =
+                              dateStr != null ? formatDateFr(dateStr) : '';
+
+                          // Jour de la semaine (fallback si pas de date)
                           final day = capitalize(entry['dayOfWeek'] ?? '');
-                          final time = '${entry['startTime']} - ${entry['endTime']}';
-                          final subject = entry['timetableSubject']?['name'] ?? 'Matière inconnue';
+
+                          final start = entry['startTime'] ?? '';
+                          final end = entry['endTime'] ?? '';
+                          final time = (start.isNotEmpty && end.isNotEmpty)
+                              ? '$start - $end'
+                              : 'Horaire inconnu';
+
+                          final subject =
+                              entry['timetableSubject']?['name'] ?? 'Matière inconnue';
+
                           final classroom = entry['timetableClassroom'] != null
                               ? '${entry['timetableClassroom']['name']} (${entry['timetableClassroom']['level']})'
                               : 'Classe inconnue';
-                          final location = entry['location'] ?? 'Non précisé';
+
+                          final location = (entry['location'] ?? '').toString().trim();
+                          final locationDisplay =
+                              location.isNotEmpty ? location : 'Non précisé';
 
                           return Card(
                             shape: RoundedRectangleBorder(
@@ -93,12 +122,29 @@ class _ProfTimetableScreenState extends State<ProfTimetableScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  if (formattedDate.isNotEmpty)
+                                    Text(
+                                      formattedDate,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0E2C5A),
+                                      ),
+                                    )
+                                  else if (day.isNotEmpty)
+                                    Text(
+                                      day,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0E2C5A),
+                                      ),
+                                    ),
+                                  const SizedBox(height: 8),
                                   Text(
-                                    '$day - $time',
+                                    time,
                                     style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0E2C5A),
+                                      fontSize: 16,
                                     ),
                                   ),
                                   const SizedBox(height: 8),
@@ -106,7 +152,7 @@ class _ProfTimetableScreenState extends State<ProfTimetableScreen> {
                                     children: [
                                       const Icon(Icons.book, size: 20, color: Colors.grey),
                                       const SizedBox(width: 6),
-                                      Text('Matière : $subject'),
+                                      Expanded(child: Text('Matière : $subject')),
                                     ],
                                   ),
                                   const SizedBox(height: 4),
@@ -114,7 +160,7 @@ class _ProfTimetableScreenState extends State<ProfTimetableScreen> {
                                     children: [
                                       const Icon(Icons.group, size: 20, color: Colors.grey),
                                       const SizedBox(width: 6),
-                                      Text('Classe : $classroom'),
+                                      Expanded(child: Text('Classe : $classroom')),
                                     ],
                                   ),
                                   const SizedBox(height: 4),
@@ -122,7 +168,7 @@ class _ProfTimetableScreenState extends State<ProfTimetableScreen> {
                                     children: [
                                       const Icon(Icons.location_on, size: 20, color: Colors.grey),
                                       const SizedBox(width: 6),
-                                      Text('Lieu : $location'),
+                                      Expanded(child: Text('Lieu : $locationDisplay')),
                                     ],
                                   ),
                                 ],
