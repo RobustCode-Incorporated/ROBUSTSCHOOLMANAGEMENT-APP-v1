@@ -81,10 +81,26 @@ export default {
         const resAvailable = await axios.get('/subjects/available')
         const resEnrolled = await axios.get('/student-subjects')
 
-        const enrolledIds = new Set(resEnrolled.data.map(s => s.id))
+        // Dédupliquer enrolledSubjects par id
+        const uniqueEnrolledMap = new Map()
+        resEnrolled.data.forEach(s => {
+          if (!uniqueEnrolledMap.has(s.id)) {
+            uniqueEnrolledMap.set(s.id, s)
+          }
+        })
+        this.enrolledSubjects = Array.from(uniqueEnrolledMap.values())
 
-        this.enrolledSubjects = resEnrolled.data
-        this.availableSubjects = resAvailable.data.filter(s => !enrolledIds.has(s.id))
+        // Créer un Set d'ids déjà inscrits
+        const enrolledIds = new Set(this.enrolledSubjects.map(s => s.id))
+
+        // Filtrer et dédupliquer availableSubjects
+        const uniqueAvailableMap = new Map()
+        resAvailable.data.forEach(s => {
+          if (!enrolledIds.has(s.id) && !uniqueAvailableMap.has(s.id)) {
+            uniqueAvailableMap.set(s.id, s)
+          }
+        })
+        this.availableSubjects = Array.from(uniqueAvailableMap.values())
 
       } catch (err) {
         this.error = "Erreur lors du chargement des matières."
