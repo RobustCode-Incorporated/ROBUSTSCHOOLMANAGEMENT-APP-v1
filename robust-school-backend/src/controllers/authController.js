@@ -3,20 +3,19 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Joi = require('joi');
 
+// Inscription publique : toujours un compte élève.
+// Les comptes prof/admin sont créés par un admin via POST /api/users.
 exports.register = async (req, res) => {
   const t = req.t; // Fonction de traduction i18next
   const schema = Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
     email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
-    role: Joi.string().valid('admin', 'prof', 'eleve').required()
+    password: Joi.string().min(6).required()
   });
 
-  const body = {
-    ...req.body,
-    role: req.body.role?.toLowerCase()
-  }
+  const { firstName, lastName, email, password } = req.body;
+  const body = { firstName, lastName, email, password };
 
   const { error } = schema.validate(body);
   if (error) {
@@ -33,6 +32,7 @@ exports.register = async (req, res) => {
 
     const newUser = await User.create({
       ...body,
+      role: 'eleve',
       password: hashedPassword
     });
 

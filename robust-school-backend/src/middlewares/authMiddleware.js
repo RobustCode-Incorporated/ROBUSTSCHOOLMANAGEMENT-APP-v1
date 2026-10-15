@@ -21,7 +21,6 @@ function authMiddleware(requiredRoles = []) {
 
         // Normalize role to lowercase for consistent checks
         const userRole = (user.role || '').toLowerCase();
-        console.log('Role dans token:', userRole);
 
         if (requiredRoles.length > 0 && !requiredRoles.map(r => r.toLowerCase()).includes(userRole)) {
           return res.status(403).json({ message: req.t ? req.t('errors.forbidden') : 'Forbidden' });

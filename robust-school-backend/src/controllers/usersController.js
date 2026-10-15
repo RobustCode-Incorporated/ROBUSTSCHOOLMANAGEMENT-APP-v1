@@ -30,6 +30,19 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+exports.getMe = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ['password'] }
+    });
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Erreur serveur lors de la récupération du profil.' });
+  }
+};
+
 exports.createUser = async (req, res) => {
   try {
     const { error } = userSchema.validate(req.body, { presence: 'required' });
