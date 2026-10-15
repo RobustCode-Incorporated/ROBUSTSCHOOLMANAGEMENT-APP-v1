@@ -94,7 +94,7 @@ const fetchTimetable = async () => {
 // Ajoute cette fonction pour gérer la déconnexion
 const handleLogout = () => {
   // Nettoyer l'état utilisateur dans le store
-  store.commit('logout')  // Assure-toi d'avoir un mutation logout qui vide user + token
+  store.dispatch('logout')  // vide user + token
 
   // Supprimer le token stocké localement si tu en as un
   localStorage.removeItem('token')

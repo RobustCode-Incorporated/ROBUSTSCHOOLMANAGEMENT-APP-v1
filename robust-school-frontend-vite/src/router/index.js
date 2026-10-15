@@ -18,7 +18,6 @@ import EleveNotes from '../views/EleveNotes.vue'
 import ProfDocuments from '../views/ProfDocuments.vue'
 import ProfTimeTable from '../views/ProfTimeTable.vue'
 import EleveSubjects from '../views/EleveSubjects.vue'
-import EleveSubjectsRegistration from '../views/EleveSubjectsRegistration.vue'
 import EleveProfile from '../views/EleveProfile.vue'
 import EleveDocuments from '../views/EleveDocuments.vue'
 import EleveTimetable from '../views/EleveTimetable.vue'
@@ -48,7 +47,8 @@ const routes = [
   { path: '/eleve/notes', name: 'EleveNotes', component: EleveNotes, meta: { requiresAuth: true, role: 'ELEVE' } },
   { path: '/eleve/profile', name: 'EleveProfile', component: EleveProfile, meta: { requiresAuth: true, role: 'ELEVE' } },
   { path: '/eleve/matieres', name: 'EleveSubjects', component: EleveSubjects, meta: { requiresAuth: true, role: 'ELEVE' } },
-  { path: '/eleve/inscription-matieres', name: 'EleveSubjectsRegistration', component: EleveSubjectsRegistration, meta: { requiresAuth: true, role: 'ELEVE' } },
+  // L'inscription aux matières se fait depuis « Mes matières »
+  { path: '/eleve/inscription-matieres', redirect: '/eleve/matieres' },
   { path: '/eleve/documents', name: 'EleveDocuments', component: EleveDocuments, meta: { requiresAuth: true, role: 'ELEVE' } },
   { path: '/eleve/timetable', name: 'EleveTimetable', component: EleveTimetable, meta: { requiresAuth: true, role: 'ELEVE' } },
 ]

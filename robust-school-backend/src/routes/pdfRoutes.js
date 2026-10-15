@@ -6,6 +6,7 @@ const User = require('../models/User');
 const Classroom = require('../models/Classroom');
 const Note = require('../models/Note');
 const Subject = require('../models/Subject');
+const StudentAssignment = require('../models/StudentAssignment');
 
 router.get('/bulletin/:studentId', authMiddleware(['eleve', 'admin']), async (req, res) => {
   try {
@@ -20,14 +21,14 @@ router.get('/bulletin/:studentId', authMiddleware(['eleve', 'admin']), async (re
     const student = await User.findByPk(studentId);
     if (!student) return res.status(404).json({ message: 'Élève non trouvé' });
 
-    // On suppose qu’un élève a une classe, à récupérer ici
-    const classroom = await Classroom.findOne({ 
-      include: [{
-        model: User,
-        as: 'students',
-        where: { id: studentId }
-      }]
+    // Classe de l'élève : affectation (student_assignments), sinon User.classroomId
+    const assignment = await StudentAssignment.findOne({
+      where: { studentId },
+      include: [{ model: Classroom, as: 'classroom' }],
+      order: [['createdAt', 'DESC']]
     });
+    const classroom = assignment?.classroom
+      || (student.classroomId && await Classroom.findByPk(student.classroomId));
 
     if (!classroom) return res.status(404).json({ message: 'Classe non trouvée' });
 
@@ -38,9 +39,10 @@ router.get('/bulletin/:studentId', authMiddleware(['eleve', 'admin']), async (re
 
     const pdfBuffer = await generateBulletinPDF(student, classroom, notes);
 
+    // res.attachment encode correctement les noms accentués
+    res.attachment(`bulletin_${student.lastName}_${student.firstName}.pdf`);
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename=bulletin_${student.lastName}_${student.firstName}.pdf`,
       'Content-Length': pdfBuffer.length
     });
 

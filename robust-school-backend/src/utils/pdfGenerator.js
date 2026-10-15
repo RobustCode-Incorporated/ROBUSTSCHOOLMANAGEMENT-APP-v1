@@ -34,7 +34,7 @@ function generateBulletinPDF(student, classroom, notes) {
     let sum = 0;
     let count = 0;
     notes.forEach(note => {
-      doc.text(note.subject.name, 50, doc.y, { continued: true });
+      doc.text(note.subject?.name || 'Matière supprimée', 50, doc.y, { continued: true });
       doc.text(note.value.toFixed(2), 300, doc.y);
       sum += note.value;
       count++;
