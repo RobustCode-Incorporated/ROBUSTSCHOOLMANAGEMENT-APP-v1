@@ -7,6 +7,31 @@ const User = require('../models/User');
 const Subject = require('../models/Subject');
 const Classroom = require('../models/Classroom');
 const TeachingAssignment = require('../models/TeachingAssignment');
+const { Op } = require('sequelize');
+
+// Cherche un créneau qui chevauche [startTime, endTime] le même jour
+// pour le même professeur ou la même classe
+async function findConflict({ date, startTime, endTime, professorId, classroomId }, excludeId) {
+  const sameResource = [];
+  if (professorId) sameResource.push({ professorId });
+  if (classroomId) sameResource.push({ classroomId });
+  if (!sameResource.length) return null;
+
+  return TimetableEntry.findOne({
+    where: {
+      date,
+      startTime: { [Op.lt]: endTime },
+      endTime: { [Op.gt]: startTime },
+      [Op.or]: sameResource,
+      ...(excludeId && { id: { [Op.ne]: excludeId } })
+    }
+  });
+}
+
+function conflictMessage(conflict, slot) {
+  const who = conflict.professorId === slot.professorId ? 'Ce professeur' : 'Cette classe';
+  return `${who} a déjà un cours de ${conflict.startTime.slice(0, 5)} à ${conflict.endTime.slice(0, 5)} ce jour-là.`;
+}
 
 // ✅ Créer un créneau horaire (admin uniquement)
 router.post('/', authMiddleware(['admin']), async (req, res) => {
@@ -14,7 +39,13 @@ router.post('/', authMiddleware(['admin']), async (req, res) => {
     const { professorId, subjectId, classroomId, date, startTime, endTime, location } = req.body;
 
     if (!date) return res.status(400).json({ message: 'Date requise.' });
+    if (!professorId || !subjectId || !classroomId || !startTime || !endTime) {
+      return res.status(400).json({ message: 'Professeur, matière, classe et horaires sont requis.' });
+    }
     if (startTime >= endTime) return res.status(400).json({ message: 'Heure de début doit précéder l\'heure de fin.' });
+
+    const conflict = await findConflict({ date, startTime, endTime, professorId, classroomId });
+    if (conflict) return res.status(409).json({ message: conflictMessage(conflict, { professorId }) });
 
     // Création du créneau
     const entry = await TimetableEntry.create({ professorId, subjectId, classroomId, date, startTime, endTime, location });
@@ -83,9 +114,20 @@ router.put('/:id', authMiddleware(['admin']), async (req, res) => {
       return res.status(400).json({ message: 'Format de date invalide (attendu: YYYY-MM-DD)' });
     }
 
-    if (startTime && endTime && startTime >= endTime) {
+    // Valeurs finales du créneau après modification
+    const slot = {
+      date: date || entry.date,
+      startTime: startTime || entry.startTime,
+      endTime: endTime || entry.endTime,
+      professorId: req.body.professorId || entry.professorId,
+      classroomId: req.body.classroomId || entry.classroomId
+    };
+    if (slot.startTime.slice(0, 5) >= slot.endTime.slice(0, 5)) {
       return res.status(400).json({ message: 'Heure de début doit précéder l\'heure de fin.' });
     }
+
+    const conflict = await findConflict(slot, entry.id);
+    if (conflict) return res.status(409).json({ message: conflictMessage(conflict, slot) });
 
     await entry.update(req.body);
     res.json(entry);

@@ -6,16 +6,35 @@ const User = require('../models/User');
 const Classroom = require('../models/Classroom');
 const TeachingAssignment = require('../models/TeachingAssignment');
 const StudentSubject = require('../models/StudentSubject');
+const Joi = require('joi');
+
+const subjectFields = {
+  name: Joi.string().trim(),
+  code: Joi.string().trim(),
+  coefficient: Joi.number().integer().min(1)
+};
+const createSubjectSchema = Joi.object(subjectFields).options({ presence: 'required' });
+const updateSubjectSchema = Joi.object(subjectFields).min(1);
+
+function subjectError(res, err) {
+  if (err.name === 'SequelizeUniqueConstraintError') {
+    return res.status(409).json({ message: 'Ce code de matière existe déjà.' });
+  }
+  console.error(err);
+  return res.status(500).json({ message: res.req.t('errors.server_error') });
+}
 
 // ✅ Créer une matière
 router.post('/', authMiddleware(['admin']), async (req, res) => {
   try {
-    const { name, code, coefficient } = req.body;
-    const subject = await Subject.create({ name, code, coefficient });
+    const { error, value } = createSubjectSchema.validate(req.body, { stripUnknown: true });
+    if (error) {
+      return res.status(400).json({ message: 'Données invalides : ' + error.details[0].message });
+    }
+    const subject = await Subject.create(value);
     res.status(201).json(subject);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: req.t('errors.server_error') });
+    subjectError(res, err);
   }
 });
 
@@ -100,13 +119,17 @@ router.get('/enrolled', authMiddleware(['eleve']), async (req, res) => {
 router.put('/:id', authMiddleware(['admin']), async (req, res) => {
   try {
     const { id } = req.params;
-    const [updated] = await Subject.update(req.body, { where: { id } });
+    const { error, value } = updateSubjectSchema.validate(req.body, { stripUnknown: true });
+    if (error) {
+      return res.status(400).json({ message: 'Données invalides : ' + error.details[0].message });
+    }
+    const [updated] = await Subject.update(value, { where: { id } });
     if (updated === 0) {
       return res.status(404).json({ message: 'Matière introuvable' });
     }
     res.json({ message: 'Matière mise à jour' });
   } catch (err) {
-    res.status(500).json({ message: req.t('errors.server_error') });
+    subjectError(res, err);
   }
 });
 

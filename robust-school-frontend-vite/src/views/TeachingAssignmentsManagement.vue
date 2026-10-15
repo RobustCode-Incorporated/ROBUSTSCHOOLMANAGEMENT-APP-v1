@@ -35,6 +35,7 @@
 
         <button type="submit" class="btn-blue">Ajouter Affectation</button>
       </form>
+      <p v-if="error" class="form-error">{{ error }}</p>
 
       <!-- Tableau -->
       <table class="styled-table">
@@ -79,6 +80,7 @@ export default {
     const selectedProfessor = ref('')
     const selectedSubject = ref('')
     const selectedClassroom = ref('')
+    const error = ref(null)
 
     const loadData = async () => {
       try {
@@ -93,12 +95,14 @@ export default {
         professors.value = resProfs.data
         subjects.value = resSubjects.data
         classrooms.value = resClasses.data
-      } catch (error) {
-        console.error('Erreur chargement données:', error)
+      } catch (err) {
+        console.error('Erreur chargement données:', err)
+        error.value = 'Erreur lors du chargement des affectations.'
       }
     }
 
     const addAssignment = async () => {
+      error.value = null
       try {
         await axios.post('teaching-assignments', {
           professorId: selectedProfessor.value,
@@ -109,8 +113,8 @@ export default {
         selectedProfessor.value = ''
         selectedSubject.value = ''
         selectedClassroom.value = ''
-      } catch (error) {
-        console.error('Erreur ajout affectation:', error)
+      } catch (err) {
+        error.value = err.response?.data?.message || 'Erreur lors de l’ajout.'
       }
     }
 
@@ -119,8 +123,8 @@ export default {
       try {
         await axios.delete(`teaching-assignments/${id}`)
         await loadData()
-      } catch (error) {
-        console.error('Erreur suppression affectation:', error)
+      } catch (err) {
+        error.value = err.response?.data?.message || 'Erreur lors de la suppression.'
       }
     }
 
@@ -134,6 +138,7 @@ export default {
       selectedProfessor,
       selectedSubject,
       selectedClassroom,
+      error,
       addAssignment,
       deleteAssignment
     }
@@ -142,6 +147,11 @@ export default {
 </script>
 
 <style scoped>
+.form-error {
+  color: #c0392b;
+  margin: -0.5rem 0 1rem;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=ABeeZee&family=Ysabeau+Office&display=swap');
 
 .wrapper {

@@ -6,6 +6,7 @@ const TimetableEntry = require('./TimetableEntry');
 const StudentSubject = require('./StudentSubject');
 const TeachingAssignment = require('./TeachingAssignment');
 const Document = require('./Document');
+const StudentAssignment = require('./StudentAssignment');
 
 const db = {
   User,
@@ -20,15 +21,15 @@ const db = {
 
 // === Associations globales ===
 
-// Élèves et Classes (many-to-many)
+// Élèves et Classes (many-to-many) via la table student_assignments
 User.belongsToMany(Classroom, {
-  through: 'StudentAssignments',
+  through: { model: StudentAssignment, unique: false },
   as: 'classrooms',
   foreignKey: 'studentId',
   otherKey: 'classroomId',
 });
 Classroom.belongsToMany(User, {
-  through: 'StudentAssignments',
+  through: { model: StudentAssignment, unique: false },
   as: 'students',
   foreignKey: 'classroomId',
   otherKey: 'studentId',

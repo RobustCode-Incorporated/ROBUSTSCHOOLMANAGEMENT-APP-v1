@@ -11,26 +11,28 @@
     <div class="content">
       <h2>📊 Mes Notes</h2>
 
-      <table class="styled-table" v-if="notes.length">
-        <thead>
-          <tr>
-            <th>Matière</th>
-            <th>Classe</th>
-            <th>Note</th>
-            <th>Commentaire</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="note in notes" :key="note.id">
-            <td>{{ note.subject?.name || '-' }}</td>
-            <td>{{ note.classroom ? note.classroom.name + ' - ' + note.classroom.level : '-' }}</td>
-            <td>{{ note.value }}</td>
-            <td>{{ note.comment || '-' }}</td>
-            <td>{{ formatDate(note.date) }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-scroll" v-if="notes.length">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Matière</th>
+              <th>Classe</th>
+              <th>Note</th>
+              <th>Commentaire</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="note in notes" :key="note.id">
+              <td>{{ note.subject?.name || '-' }}</td>
+              <td>{{ note.classroom ? note.classroom.name + ' - ' + note.classroom.level : '-' }}</td>
+              <td>{{ note.value }}</td>
+              <td>{{ note.comment || '-' }}</td>
+              <td>{{ formatDate(note.date) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <p v-else class="empty-msg">Aucune note disponible pour le moment.</p>
       <p v-if="error" class="error">{{ error }}</p>
@@ -123,6 +125,25 @@ export default {
   background-color: #c0392b;
 }
 
+/* Téléphone : titre réduit, bouton sans retour à la ligne */
+@media (max-width: 600px) {
+  .header {
+    padding: 0.75rem 1rem;
+    gap: 0.5rem;
+  }
+  .header .logo {
+    width: 36px;
+  }
+  .header h1 {
+    font-size: 0.95rem;
+    min-width: 0;
+  }
+  .logout-button {
+    padding: 0.4rem 0.6rem;
+    white-space: nowrap;
+  }
+}
+
 /* Contenu */
 .content {
   max-width: 960px;
@@ -138,6 +159,11 @@ export default {
 }
 
 /* Table */
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
 .styled-table {
   width: 100%;
   border-collapse: collapse;
