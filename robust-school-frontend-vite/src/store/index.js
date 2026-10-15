@@ -33,11 +33,10 @@ const store = createStore({
       commit('SET_USER', res.data.user)
       return res.data.user
     },
-    async register({ commit }, userData) {
+    // L'inscription ne renvoie pas de token : l'utilisateur se connecte ensuite
+    async register(_, userData) {
       const res = await axios.post('http://localhost:5050/api/auth/register', userData)
-      commit('SET_TOKEN', res.data.token)
-      commit('SET_USER', res.data.user)
-      return res.data.user
+      return res.data
     },
     async registerWithoutLogin(_, userData) {
       const res = await axios.post('http://localhost:5050/users', userData)

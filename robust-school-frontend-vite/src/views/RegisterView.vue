@@ -21,8 +21,9 @@
         <label>Mot de passe</label>
         <input v-model="password" type="password" placeholder="Mot de passe" required />
 
-        <label>Rôle</label>
-        <select v-model="role" required>
+        <!-- Choix du rôle réservé à l'admin ; l'inscription publique crée un compte élève -->
+        <label v-if="isAdminCreation">Rôle</label>
+        <select v-if="isAdminCreation" v-model="role" required>
           <option disabled value="">Choisir un rôle</option>
           <option value="ADMIN">Admin</option>
           <option value="PROF">Professeur</option>
@@ -48,6 +49,7 @@
 import { useRouter, useRoute } from 'vue-router'
 import { ref } from 'vue'
 import store from '../store'
+import api from '../plugins/axios'
 
 export default {
   name: 'RegisterView',
@@ -61,21 +63,24 @@ export default {
     const success = ref(false)
     const router = useRouter()
     const route = useRoute()
+    const isAdminCreation = route.query.from === 'admin' && store.getters.userRole === 'admin'
 
     const handleRegister = async () => {
       try {
         error.value = null
-        const user = await store.dispatch('register', {
+        const userData = {
           firstName: firstName.value,
           lastName: lastName.value,
           email: email.value,
           password: password.value,
-          role: role.value,
-        })
+        }
 
-        if (route.query.from === 'admin') {
+        if (isAdminCreation) {
+          // Création par l'admin : route protégée, la session admin est conservée
+          await api.post('/users', { ...userData, role: role.value.toLowerCase() })
           router.push('/admin/users')
         } else {
+          await store.dispatch('register', userData)
           success.value = true
         }
       } catch (err) {
@@ -98,6 +103,7 @@ export default {
       email,
       password,
       role,
+      isAdminCreation,
       error,
       success,
       handleRegister,

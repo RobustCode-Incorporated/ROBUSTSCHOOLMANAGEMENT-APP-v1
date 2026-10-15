@@ -6,15 +6,31 @@ const User = require('../models/User');
 const Subject = require('../models/Subject');
 const Classroom = require('../models/Classroom');
 const TeachingAssignment = require('../models/TeachingAssignment');
+const StudentSubject = require('../models/StudentSubject');
+const Joi = require('joi');
+
+// Seuls ces champs sont modifiables ; une note reste entre 0 et 20
+const noteFields = {
+  value: Joi.number().min(0).max(20),
+  comment: Joi.string().allow('', null),
+  date: Joi.date().iso()
+};
+const createNoteSchema = Joi.object({
+  studentId: Joi.string().uuid().required(),
+  subjectId: Joi.string().uuid().required(),
+  ...noteFields,
+  value: noteFields.value.required()
+});
+const updateNoteSchema = Joi.object(noteFields).min(1);
 
 // ✅ Créer une note (professeur)
 router.post('/', authMiddleware(['prof']), async (req, res) => {
   try {
-    const { studentId, subjectId, value, comment = '', date = new Date() } = req.body;
-
-    if (!studentId || !subjectId || value == null) {
-      return res.status(400).json({ message: 'studentId, subjectId et value sont requis' });
+    const { error, value: body } = createNoteSchema.validate(req.body, { stripUnknown: true });
+    if (error) {
+      return res.status(400).json({ message: 'Données invalides : ' + error.details[0].message });
     }
+    const { studentId, subjectId, value, comment = '', date = new Date() } = body;
 
     const teachingAssignment = await TeachingAssignment.findOne({
       where: {
@@ -25,6 +41,12 @@ router.post('/', authMiddleware(['prof']), async (req, res) => {
 
     if (!teachingAssignment) {
       return res.status(403).json({ message: 'Vous n’êtes pas autorisé à noter cette matière' });
+    }
+
+    // L'élève doit être inscrit à la matière
+    const enrollment = await StudentSubject.findOne({ where: { studentId, subjectId } });
+    if (!enrollment) {
+      return res.status(403).json({ message: 'Cet élève n’est pas inscrit à cette matière' });
     }
 
     const classroomId = teachingAssignment.classroomId;
@@ -109,16 +131,20 @@ router.get('/professeur', authMiddleware(['prof']), async (req, res) => {
   }
 });
 
-// ✅ Modifier une note
+// ✅ Modifier une note (uniquement ses propres notes)
 router.put('/:id', authMiddleware(['prof']), async (req, res) => {
   try {
-    const { id } = req.params;
-    const [updated] = await Note.update(req.body, { where: { id } });
+    const { error, value: changes } = updateNoteSchema.validate(req.body, { stripUnknown: true });
+    if (error) {
+      return res.status(400).json({ message: 'Données invalides : ' + error.details[0].message });
+    }
 
-    if (updated === 0) {
+    const note = await Note.findOne({ where: { id: req.params.id, professorId: req.user.id } });
+    if (!note) {
       return res.status(404).json({ message: 'Note introuvable' });
     }
 
+    await note.update(changes);
     res.json({ message: 'Note mise à jour' });
   } catch (err) {
     console.error('Erreur mise à jour note:', err);
@@ -126,11 +152,13 @@ router.put('/:id', authMiddleware(['prof']), async (req, res) => {
   }
 });
 
-// ✅ Supprimer une note
+// ✅ Supprimer une note (uniquement ses propres notes)
 router.delete('/:id', authMiddleware(['prof']), async (req, res) => {
   try {
-    const { id } = req.params;
-    await Note.destroy({ where: { id } });
+    const deleted = await Note.destroy({ where: { id: req.params.id, professorId: req.user.id } });
+    if (!deleted) {
+      return res.status(404).json({ message: 'Note introuvable' });
+    }
 
     res.json({ message: 'Note supprimée' });
   } catch (err) {

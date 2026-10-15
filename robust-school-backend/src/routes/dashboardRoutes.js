@@ -3,7 +3,6 @@ const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
 
 router.get('/', authMiddleware(['admin', 'prof', 'eleve']), (req, res) => {
-  console.log('Utilisateur connecté:', req.user);  // Ajout du log
   try {
     const userRole = req.user.role;
     let message = '';
