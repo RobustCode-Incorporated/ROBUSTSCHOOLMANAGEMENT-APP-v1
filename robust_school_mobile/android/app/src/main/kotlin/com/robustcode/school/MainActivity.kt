@@ -1,4 +1,4 @@
-package com.example.robust_school_mobile
+package com.robustcode.school
 
 import io.flutter.embedding.android.FlutterActivity
 
