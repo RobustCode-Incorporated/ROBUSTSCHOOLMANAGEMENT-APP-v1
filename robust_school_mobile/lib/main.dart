@@ -11,7 +11,6 @@ import '../screens/EleveNotesScreen.dart';
 import '../screens/EleveDocumentsScreen.dart';
 import '../screens/EleveSubjectsScreen.dart';
 import '../screens/EleveTimetableScreen.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

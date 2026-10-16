@@ -57,4 +57,4 @@ Légende priorité : **P0** bloque toute mise en ligne · **P1** bloque le pilot
 
 - **Fichier `.env` local** : les anciens commits de `main` (avant la PR #1) suivent encore l'ancien `.env`. Revenir sur un de ces commits **supprime le `.env` local** au retour. Garder une copie du `.env` hors du dépôt.
 - **Section RSDDF** du plan d'évolution : définition du sigle toujours à confirmer.
-- **Application mobile** : jamais compilée ni lancée sur ce poste (pas de Flutter ni de Java, disque plein). Le code et la configuration ont été vérifiés et préparés ; le premier `flutter analyze` peut demander des mises à jour de dépendances.
+- **Application mobile** : Flutter 3.47.7 installé le 16/10. Build iOS réussi (avant la mise à jour des dépendances). Build Android interrompu : disque plein (3 Go libres après le build). PR #6 à compiler puis fusionner.

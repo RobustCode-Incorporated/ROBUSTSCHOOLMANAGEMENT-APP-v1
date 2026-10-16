@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
@@ -65,10 +64,10 @@ class _ProfDocumentsScreenState extends State<ProfDocumentsScreen> {
   }
 
   Future<void> pickFile() async {
-    final result = await FilePicker.platform.pickFiles(withReadStream: true);
-    if (result != null) {
+    final file = await FilePicker.pickFile();
+    if (file != null) {
       setState(() {
-        selectedFile = result.files.first;
+        selectedFile = file;
       });
     }
   }
@@ -89,8 +88,9 @@ class _ProfDocumentsScreenState extends State<ProfDocumentsScreen> {
     });
 
     try {
-      final stream = selectedFile!.readStream;
-      if (stream == null) {
+      final file = selectedFile!;
+      final length = file.lengthSync() ?? await file.length();
+      if (length == null) {
         setState(() {
           error = 'Impossible de lire le fichier.';
           isLoading = false;
@@ -99,10 +99,10 @@ class _ProfDocumentsScreenState extends State<ProfDocumentsScreen> {
       }
 
       final formData = FormData.fromMap({
-        'file': MultipartFile(
-          stream,
-          selectedFile!.size,
-          filename: selectedFile!.name,
+        'file': MultipartFile.fromStream(
+          file.readAsByteStream,
+          length,
+          filename: file.name,
           contentType: MediaType('application', 'octet-stream'),
         ),
         'classroomId': selectedClassroomId,
