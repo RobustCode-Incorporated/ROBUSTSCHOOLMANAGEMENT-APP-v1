@@ -1,6 +1,9 @@
 
 
+const { Op } = require('sequelize');
 const User = require('../models/User');
+const Note = require('../models/Note');
+const { archiveFilter, deleteOrArchive, restoreHandler } = require('../utils/archive');
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
 
@@ -14,7 +17,7 @@ const userSchema = Joi.object({
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const whereClause = {};
+    const whereClause = archiveFilter(req);
     if (req.query.role) {
       whereClause.role = req.query.role.toLowerCase();
     }
@@ -78,19 +81,33 @@ exports.createUser = async (req, res) => {
   }
 };
 
+// Un utilisateur ayant des notes (élève ou prof) est archivé, pas supprimé
 exports.deleteUser = async (req, res) => {
   try {
-    const userId = req.params.id;
-    const deletedCount = await User.destroy({ where: { id: userId } });
-    if (deletedCount === 0) {
+    const user = await User.findByPk(req.params.id);
+    if (!user) {
       return res.status(404).json({ message: 'Utilisateur non trouvé.' });
     }
-    res.json({ message: 'Utilisateur supprimé avec succès.' });
+    if (user.id === req.user.id) {
+      return res.status(400).json({ message: 'Vous ne pouvez pas supprimer votre propre compte.' });
+    }
+
+    const { archived } = await deleteOrArchive(user, () =>
+      Note.count({ where: { [Op.or]: [{ studentId: user.id }, { professorId: user.id }] } })
+    );
+    res.json({
+      archived,
+      message: archived
+        ? 'Utilisateur archivé : il a des notes, elles sont conservées.'
+        : 'Utilisateur supprimé avec succès.'
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Erreur serveur lors de la suppression de l’utilisateur.' });
   }
 };
+
+exports.restoreUser = restoreHandler(User, 'Utilisateur');
 
 exports.updateUser = async (req, res) => {
   try {

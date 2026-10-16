@@ -18,6 +18,10 @@ const Classroom = sequelize.define('Classroom', {
   academicYear: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  archivedAt: { // archivage au lieu de suppression quand il existe des notes
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'classrooms'

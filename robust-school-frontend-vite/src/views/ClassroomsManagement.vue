@@ -21,6 +21,12 @@
       </section>
 
       <button class="refresh" @click="fetchClassrooms">Rafraîchir la liste</button>
+      <label class="archive-toggle">
+        <input type="checkbox" v-model="showArchived" @change="fetchClassrooms" />
+        Afficher les archivés
+      </label>
+      <p v-if="info" class="info">{{ info }}</p>
+
 
       <table>
         <thead>
@@ -37,8 +43,13 @@
             <td>{{ classe.level }}</td>
             <td>{{ classe.academicYear }}</td>
             <td>
-              <button class="edit" @click="startEdit(classe)">Modifier</button>
-              <button class="delete" @click="deleteClassroom(classe.id)">Supprimer</button>
+              <template v-if="showArchived">
+                <button class="edit" @click="restoreClassroom(classe)">Restaurer</button>
+              </template>
+              <template v-else>
+                <button class="edit" @click="startEdit(classe)">Modifier</button>
+                <button class="delete" @click="deleteClassroom(classe.id)">Supprimer</button>
+              </template>
             </td>
           </tr>
         </tbody>
@@ -78,12 +89,23 @@ export default {
       addError: null,
       editClass: null,
       editError: null,
+      showArchived: false,
+      info: null,
     }
   },
   methods: {
+    async restoreClassroom(item) {
+      try {
+        const res = await api.post(`/classrooms/${item.id}/restore`)
+        this.info = res.data.message
+        this.fetchClassrooms()
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Erreur lors de la restauration.'
+      }
+    },
     async fetchClassrooms() {
       try {
-        const res = await api.get('/classrooms')
+        const res = await api.get('/classrooms', { params: this.showArchived ? { archived: true } : {} })
         this.classrooms = res.data
       } catch (err) {
         this.error = 'Erreur de chargement des classes.'
@@ -102,7 +124,8 @@ export default {
     async deleteClassroom(id) {
       if (!confirm('Supprimer cette classe ?')) return
       try {
-        await api.delete(`/classrooms/${id}`)
+        const res = await api.delete(`/classrooms/${id}`)
+        this.info = res.data.message
         this.fetchClassrooms()
       } catch (err) {
         this.error = 'Erreur lors de la suppression.'
@@ -132,6 +155,19 @@ export default {
 </script>
 
 <style scoped>
+.archive-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.info {
+  color: #1e6b3a;
+  margin-bottom: 1rem;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=ABeeZee&family=Inter&family=Ysabeau+Office&display=swap');
 
 .classrooms-management {

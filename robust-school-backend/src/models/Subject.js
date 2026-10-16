@@ -21,6 +21,10 @@ const Subject = sequelize.define('Subject', {
   coefficient: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+  archivedAt: { // archivage au lieu de suppression quand il existe des notes
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'subjects'

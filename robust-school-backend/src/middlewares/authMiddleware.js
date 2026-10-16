@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
 function authMiddleware(requiredRoles = []) {
   return (req, res, next) => {
@@ -13,7 +14,7 @@ function authMiddleware(requiredRoles = []) {
         return res.status(401).json({ message: req.t ? req.t('errors.unauthorized') : 'Unauthorized' });
       }
 
-      jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      jwt.verify(token, process.env.JWT_SECRET, async (err, user) => {
         if (err) {
           console.error('Erreur JWT :', err);
           return res.status(403).json({ message: req.t ? req.t('errors.forbidden') : 'Forbidden' });
@@ -24,6 +25,17 @@ function authMiddleware(requiredRoles = []) {
 
         if (requiredRoles.length > 0 && !requiredRoles.map(r => r.toLowerCase()).includes(userRole)) {
           return res.status(403).json({ message: req.t ? req.t('errors.forbidden') : 'Forbidden' });
+        }
+
+        // Le compte doit toujours exister et ne pas être archivé
+        try {
+          const account = await User.findByPk(user.id, { attributes: ['archivedAt'] });
+          if (!account || account.archivedAt) {
+            return res.status(401).json({ message: req.t ? req.t('errors.unauthorized') : 'Unauthorized' });
+          }
+        } catch (dbErr) {
+          console.error('Erreur vérification compte:', dbErr);
+          return res.status(500).json({ message: req.t ? req.t('errors.server_error') : 'Internal Server Error' });
         }
 
         // Attach user info to req for later use

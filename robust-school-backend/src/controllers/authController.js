@@ -67,6 +67,10 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: t('errors.invalid_credentials') });
     }
 
+    if (user.archivedAt) {
+      return res.status(403).json({ message: 'Ce compte est archivé. Contactez l’administration.' });
+    }
+
     const tokenPayload = { id: user.id, role: user.role };
     if (user.role === 'eleve') {
       tokenPayload.classroomId = user.classroomId;

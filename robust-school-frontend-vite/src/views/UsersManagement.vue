@@ -36,6 +36,12 @@
       </div>
 
       <button @click="fetchUsers" class="btn-refresh">🔄 Rafraîchir la liste</button>
+      <label class="archive-toggle">
+        <input type="checkbox" v-model="showArchived" @change="fetchUsers" />
+        Afficher les archivés
+      </label>
+      <p v-if="info" class="info">{{ info }}</p>
+
 
       <!-- Tableau utilisateurs -->
       <table class="styled-table">
@@ -53,8 +59,13 @@
             <td>{{ user.email }}</td>
             <td>{{ user.role }}</td>
             <td>
-              <button @click="startEditUser(user)" class="btn-edit">Modifier</button>
-              <button @click="confirmDelete(user)" class="btn-delete">Supprimer</button>
+              <template v-if="showArchived">
+                <button class="btn-edit" @click="restoreUser(user)">Restaurer</button>
+              </template>
+              <template v-else>
+                <button @click="startEditUser(user)" class="btn-edit">Modifier</button>
+                <button @click="confirmDelete(user)" class="btn-delete">Supprimer</button>
+              </template>
             </td>
           </tr>
         </tbody>
@@ -76,12 +87,23 @@ export default {
       error: null,
       editUser: null,
       editUserError: null,
+      showArchived: false,
+      info: null,
     }
   },
   methods: {
+    async restoreUser(item) {
+      try {
+        const res = await api.post(`/users/${item.id}/restore`)
+        this.info = res.data.message
+        this.fetchUsers()
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Erreur lors de la restauration.'
+      }
+    },
     async fetchUsers() {
       try {
-        const res = await api.get('/users')
+        const res = await api.get('/users', { params: this.showArchived ? { archived: true } : {} })
         this.users = res.data
       } catch (err) {
         this.error = err.response?.data?.message || 'Erreur chargement utilisateurs'
@@ -109,7 +131,8 @@ export default {
     async confirmDelete(user) {
       if (!confirm(`Supprimer ${user.firstName} ${user.lastName} ?`)) return
       try {
-        await api.delete(`/users/${user.id}`)
+        const res = await api.delete(`/users/${user.id}`)
+        this.info = res.data.message
         this.fetchUsers()
       } catch (err) {
         this.error = err.response?.data?.message || 'Erreur suppression'
@@ -123,6 +146,19 @@ export default {
 </script>
 
 <style scoped>
+.archive-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.info {
+  color: #1e6b3a;
+  margin-bottom: 1rem;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Ysabeau+Office&family=ABeeZee&family=Inter&display=swap');
 
 .users-wrapper {

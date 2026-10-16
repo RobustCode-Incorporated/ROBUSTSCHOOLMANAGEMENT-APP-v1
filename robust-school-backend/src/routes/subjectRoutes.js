@@ -7,6 +7,8 @@ const Classroom = require('../models/Classroom');
 const TeachingAssignment = require('../models/TeachingAssignment');
 const StudentSubject = require('../models/StudentSubject');
 const Joi = require('joi');
+const Note = require('../models/Note');
+const { archiveFilter, deleteOrArchive, restoreHandler } = require('../utils/archive');
 
 const subjectFields = {
   name: Joi.string().trim(),
@@ -41,7 +43,7 @@ router.post('/', authMiddleware(['admin']), async (req, res) => {
 // ✅ Lister toutes les matières
 router.get('/', authMiddleware(['admin', 'prof', 'eleve']), async (req, res) => {
   try {
-    const subjects = await Subject.findAll();
+    const subjects = await Subject.findAll({ where: archiveFilter(req) });
     res.json(subjects);
   } catch (err) {
     res.status(500).json({ message: req.t('errors.server_error') });
@@ -53,8 +55,8 @@ router.get('/available', authMiddleware(['eleve']), async (req, res) => {
   try {
     const assignments = await TeachingAssignment.findAll({
       include: [
-        { model: Subject, as: 'assignedSubject', attributes: ['id', 'name', 'code'] },
-        { model: User, as: 'assignedProfessor', attributes: ['firstName', 'lastName'] },
+        { model: Subject, as: 'assignedSubject', attributes: ['id', 'name', 'code'], where: { archivedAt: null } },
+        { model: User, as: 'assignedProfessor', attributes: ['firstName', 'lastName'], where: { archivedAt: null } },
         { model: Classroom, as: 'assignedClassroom', attributes: ['name', 'level'] }
       ]
     });
@@ -133,16 +135,28 @@ router.put('/:id', authMiddleware(['admin']), async (req, res) => {
   }
 });
 
-// ✅ Supprimer une matière
+// ✅ Supprimer une matière (archivée si elle a des notes)
 router.delete('/:id', authMiddleware(['admin']), async (req, res) => {
   try {
-    const { id } = req.params;
-    await Subject.destroy({ where: { id } });
-    res.json({ message: 'Matière supprimée' });
+    const subject = await Subject.findByPk(req.params.id);
+    if (!subject) {
+      return res.status(404).json({ message: 'Matière introuvable' });
+    }
+    const { archived } = await deleteOrArchive(subject, () =>
+      Note.count({ where: { subjectId: subject.id } })
+    );
+    res.json({
+      archived,
+      message: archived ? 'Matière archivée : elle a des notes, elles sont conservées.' : 'Matière supprimée'
+    });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: req.t('errors.server_error') });
   }
 });
+
+// ✅ Restaurer une matière archivée
+router.post('/:id/restore', authMiddleware(['admin']), restoreHandler(Subject, 'Matière'));
 
 router.get('/professor/enrolled-students', authMiddleware(['prof']), async (req, res) => {
   try {
@@ -160,7 +174,8 @@ router.get('/professor/enrolled-students', authMiddleware(['prof']), async (req,
         {
           model: User,
           as: 'student',
-          attributes: ['id', 'firstName', 'lastName']
+          attributes: ['id', 'firstName', 'lastName'],
+          where: { archivedAt: null }
         },
         {
           model: Subject,

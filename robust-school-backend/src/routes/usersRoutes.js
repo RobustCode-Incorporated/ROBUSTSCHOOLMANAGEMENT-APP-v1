@@ -15,6 +15,9 @@ router.post('/', authMiddleware(['admin']), usersController.createUser);
 // Supprimer un utilisateur par ID
 router.delete('/:id', authMiddleware(['admin']), usersController.deleteUser);
 
+// Restaurer un utilisateur archivé
+router.post('/:id/restore', authMiddleware(['admin']), usersController.restoreUser);
+
 // Modifier un utilisateur par ID
 router.put('/:id', authMiddleware(['admin']), usersController.updateUser);
 

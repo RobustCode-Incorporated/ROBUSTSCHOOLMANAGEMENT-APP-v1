@@ -9,9 +9,9 @@ const timetableRoutes = require('./timetableRoutes');
 // Route stats
 router.get('/stats', authMiddleware(['admin']), async (req, res) => {
   try {
-    const students = await User.count({ where: { role: 'eleve' } });
-    const teachers = await User.count({ where: { role: 'prof' } });
-    const subjects = await Subject.count();
+    const students = await User.count({ where: { role: 'eleve', archivedAt: null } });
+    const teachers = await User.count({ where: { role: 'prof', archivedAt: null } });
+    const subjects = await Subject.count({ where: { archivedAt: null } });
     const documents = await Document.count();
 
     res.json({
