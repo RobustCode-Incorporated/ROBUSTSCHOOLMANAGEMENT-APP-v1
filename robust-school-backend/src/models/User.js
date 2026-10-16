@@ -23,6 +23,10 @@ const User = sequelize.define('User', {
       key: 'id'
     },
     onDelete: 'SET NULL'
+  },
+  archivedAt: { // archivage au lieu de suppression quand il existe des notes
+    type: DataTypes.DATE,
+    allowNull: true
   }
 });
 

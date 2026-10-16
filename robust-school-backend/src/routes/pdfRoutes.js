@@ -1,4 +1,5 @@
 const express = require('express');
+const { Op } = require('sequelize');
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
 const { generateBulletinPDF } = require('../utils/pdfGenerator');
@@ -21,14 +22,20 @@ router.get('/bulletin/:studentId', authMiddleware(['eleve', 'admin']), async (re
     const student = await User.findByPk(studentId);
     if (!student) return res.status(404).json({ message: 'Élève non trouvé' });
 
-    // Classe de l'élève : affectation (student_assignments), sinon User.classroomId
+    // Classe de l'élève : affectation (student_assignments), sinon User.classroomId,
+    // sinon la classe de sa note la plus récente
     const assignment = await StudentAssignment.findOne({
       where: { studentId },
       include: [{ model: Classroom, as: 'classroom' }],
       order: [['createdAt', 'DESC']]
     });
+    const lastNote = await Note.findOne({
+      where: { studentId, classroomId: { [Op.ne]: null } },
+      order: [['date', 'DESC']]
+    });
     const classroom = assignment?.classroom
-      || (student.classroomId && await Classroom.findByPk(student.classroomId));
+      || (student.classroomId && await Classroom.findByPk(student.classroomId))
+      || (lastNote && await Classroom.findByPk(lastNote.classroomId));
 
     if (!classroom) return res.status(404).json({ message: 'Classe non trouvée' });
 

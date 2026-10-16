@@ -21,6 +21,12 @@
       </div>
 
       <button @click="fetchSubjects" class="btn-refresh">🔄 Rafraîchir la liste</button>
+      <label class="archive-toggle">
+        <input type="checkbox" v-model="showArchived" @change="fetchSubjects" />
+        Afficher les archivés
+      </label>
+      <p v-if="info" class="info">{{ info }}</p>
+
 
       <table class="styled-table" v-if="subjects.length">
         <thead>
@@ -37,8 +43,13 @@
             <td>{{ subject.code }}</td>
             <td>{{ subject.coefficient }}</td>
             <td>
-              <button @click="startEdit(subject)" class="btn-edit">Modifier</button>
-              <button @click="deleteSubject(subject.id)" class="btn-delete">Supprimer</button>
+              <template v-if="showArchived">
+                <button class="btn-edit" @click="restoreSubject(subject)">Restaurer</button>
+              </template>
+              <template v-else>
+                <button @click="startEdit(subject)" class="btn-edit">Modifier</button>
+                <button @click="deleteSubject(subject.id)" class="btn-delete">Supprimer</button>
+              </template>
             </td>
           </tr>
         </tbody>
@@ -74,12 +85,23 @@ export default {
       addError: null,
       editSubject: null,
       editError: null,
+      showArchived: false,
+      info: null,
     }
   },
   methods: {
+    async restoreSubject(item) {
+      try {
+        const res = await api.post(`/subjects/${item.id}/restore`)
+        this.info = res.data.message
+        this.fetchSubjects()
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Erreur lors de la restauration.'
+      }
+    },
     async fetchSubjects() {
       try {
-        const res = await api.get('/subjects')
+        const res = await api.get('/subjects', { params: this.showArchived ? { archived: true } : {} })
         this.subjects = res.data
       } catch (err) {
         this.error = 'Erreur de chargement des matières.'
@@ -98,7 +120,8 @@ export default {
     async deleteSubject(id) {
       if (!confirm('Supprimer cette matière ?')) return
       try {
-        await api.delete(`/subjects/${id}`)
+        const res = await api.delete(`/subjects/${id}`)
+        this.info = res.data.message
         this.fetchSubjects()
       } catch (err) {
         this.error = 'Erreur lors de la suppression.'
@@ -128,6 +151,19 @@ export default {
 </script>
 
 <style scoped>
+.archive-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.info {
+  color: #1e6b3a;
+  margin-bottom: 1rem;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=ABeeZee&family=Ysabeau+Office&family=Inter&display=swap');
 
 .subjects-wrapper {

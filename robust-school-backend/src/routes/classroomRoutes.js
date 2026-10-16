@@ -8,6 +8,8 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
 const Classroom = require('../models/Classroom');
+const Note = require('../models/Note');
+const { archiveFilter, deleteOrArchive, restoreHandler } = require('../utils/archive');
 
 // Créer une classe
 router.post('/', authMiddleware(['admin']), async (req, res) => {
@@ -28,7 +30,7 @@ router.post('/', authMiddleware(['admin']), async (req, res) => {
 // Lister toutes les classes
 router.get('/', authMiddleware(['admin', 'prof', 'eleve']), async (req, res) => {
   try {
-    const list = await Classroom.findAll();
+    const list = await Classroom.findAll({ where: archiveFilter(req) });
     res.json(list);
   } catch (err) {
     res.status(500).json({ message: req.t('errors.server_error') });
@@ -55,18 +57,27 @@ router.put('/:id', authMiddleware(['admin']), async (req, res) => {
   }
 });
 
-// Supprimer une classe
+// Supprimer une classe (archivée si elle a des notes)
 router.delete('/:id', authMiddleware(['admin']), async (req, res) => {
   try {
-    const { id } = req.params;
-    const deleted = await Classroom.destroy({ where: { id } });
-    if (!deleted) {
+    const classroom = await Classroom.findByPk(req.params.id);
+    if (!classroom) {
       return res.status(404).json({ message: 'Classe introuvable' });
     }
-    res.json({ message: 'Classe supprimée' });
+    const { archived } = await deleteOrArchive(classroom, () =>
+      Note.count({ where: { classroomId: classroom.id } })
+    );
+    res.json({
+      archived,
+      message: archived ? 'Classe archivée : elle a des notes, elles sont conservées.' : 'Classe supprimée'
+    });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: req.t('errors.server_error') });
   }
 });
+
+// Restaurer une classe archivée
+router.post('/:id/restore', authMiddleware(['admin']), restoreHandler(Classroom, 'Classe'));
 
 module.exports = router;
