@@ -1,6 +1,13 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Accès à l'API (obligatoire en release : sans elle l'app ne joint pas le serveur) -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Ajoutée par certains plugins d'ouverture de fichiers ; refusée par le Play Store
+         sans justification. L'app n'installe pas d'APK, on la retire. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove"/>
+
     <application
-        android:label="Robust School Management App"
+        android:label="Robust School"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

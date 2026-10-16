@@ -4,7 +4,13 @@ import 'package:http/http.dart' as http;
 
 
 class ApiService {
-  static const String baseUrl = 'http://172.20.10.7:5050/api'; // change selon ton backend
+  // URL de l'API fournie à la compilation :
+  //   flutter build appbundle --dart-define=API_URL=https://api.<domaine>/api
+  // Valeur par défaut : serveur de développement local (http, debug uniquement)
+  static const String baseUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'http://172.20.10.7:5050/api',
+  );
   static final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   // ✅ ➕ Ajouté pour les cas où on a besoin des headers prêts à l’emploi

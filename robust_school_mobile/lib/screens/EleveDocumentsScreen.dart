@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:open_file/open_file.dart';
 import '../services/api_service.dart';
 
@@ -82,12 +81,8 @@ class _EleveDocumentsScreenState extends State<EleveDocumentsScreen> {
       return;
     }
 
-    final status = await Permission.storage.request();
-    if (!status.isGranted) {
-      showSnackBar('Permission de stockage refusée');
-      return;
-    }
-
+    // Pas de permission nécessaire : le fichier va dans le dossier privé de l'app
+    // (Permission.storage est toujours refusée sur Android 13+ et n'existe pas sur iOS)
     final baseUrl = ApiService.baseUrl;
     final url = '$baseUrl/documents/download/$filename';
 

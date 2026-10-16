@@ -2,6 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import PrivacyPolicy from '../views/PrivacyPolicy.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
 import ProfDashboard from '../views/ProfDashboard.vue'
 import EleveDashboard from '../views/EleveDashboard.vue'
@@ -26,6 +27,8 @@ const routes = [
   { path: '/', redirect: '/login' },
   { path: '/login', name: 'Login', component: LoginView },
   { path: '/register', name: 'Register', component: RegisterView },
+  // Page publique exigée par le Play Store et l'App Store
+  { path: '/confidentialite', name: 'PrivacyPolicy', component: PrivacyPolicy },
 
   { path: '/admin', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAuth: true, role: 'ADMIN' } },
   { path: '/admin/users', name: 'UsersManagement', component: UsersManagement, meta: { requiresAuth: true, role: 'ADMIN' } },

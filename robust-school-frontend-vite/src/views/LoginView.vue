@@ -24,6 +24,8 @@
       </p>
 
       <p v-if="error" class="error">{{ error }}</p>
+
+      <router-link to="/confidentialite" class="privacy-link">Politique de confidentialité</router-link>
     </div>
   </div>
 </template>
@@ -67,6 +69,12 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
+.privacy-link {
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+  color: #707070;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=ABeeZee&family=Inter&family=Ysabeau+Office&display=swap');
 
 .login-container {
